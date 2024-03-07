@@ -23,5 +23,4 @@ argparse
 notebook
 ipywidgets
 pandas
-jsonlib
 tqdm
