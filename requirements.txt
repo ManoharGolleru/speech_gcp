@@ -1,12 +1,12 @@
 numpy
-torch
+
 g2p_en
 unidecode
 pydub
 flask
 flask_cors
 scipy
-librosa
+
 IPython
 matplotlib
 sounddevice
