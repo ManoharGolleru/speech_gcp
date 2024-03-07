@@ -3,7 +3,7 @@ g2p_en
 unidecode
 pydub
 flask
-flask_cors
+Flask-Cors
 scipy
 IPython
 matplotlib
@@ -11,13 +11,14 @@ sounddevice
 google-cloud-storage
 
 # --------- Tacotron2 + Tronduo additions --------- #
-
-librosa
+torch==1.13.1
+librosa==0.9.2
 inflect
 # --------- HiFi-GAN --------- #
 glob2
 # --------- MOS_SSL ------- #
-
+fairseq==0.10.2
+torchaudio==0.13.1
 argparse
 # --------- So_To_Speak interface --------- #
 notebook
