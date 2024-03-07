@@ -57,7 +57,7 @@ def setup_models():
     hparams.speaker_embedding_dim = 8
 
     
-    path = "/mnt/gcs/So_To_Speak/models/tronduo/"
+    path = "/home/manohargolleru2000/speech/So_To_Speak/models/tronduo/"
     iter = "70000"
     checkpoint_path = path + "checkpoint_" + iter
     model = load_model(hparams)
@@ -65,7 +65,7 @@ def setup_models():
     model = model.cpu().eval()
 
  
-    hfg_path = '/mnt/gcs/So_To_Speak/models/hifigan/'
+    hfg_path = '/home/manohargolleru2000/speech/So_To_Speak/models/hifigan/'
 
     checkpoint = 2640000
     config_file = hfg_path + 'config.json'
