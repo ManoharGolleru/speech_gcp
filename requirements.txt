@@ -11,7 +11,7 @@ sounddevice
 google-cloud-storage
 
 # --------- Tacotron2 + Tronduo additions --------- #
-torch
+
 librosa
 inflect
 # --------- HiFi-GAN --------- #
