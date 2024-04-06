@@ -53,7 +53,7 @@ def setup_models():
     hparams.speakers = True
     hparams.feat_dim = 2
     hparams.feat_max_bg = 4
-    hparams.n_speakers = 2
+    hparams.n_speakers = 3
     hparams.speaker_embedding_dim = 8
 
     
@@ -62,7 +62,7 @@ def setup_models():
     checkpoint_path = path + "checkpoint_" + iter
     model = load_model(hparams)
     model.load_state_dict(torch.load(checkpoint_path, map_location=torch.device('cuda'))['state_dict'])
-    model = model.cpu().eval()
+    model = model.cuda().eval()
 
  
     hfg_path = '/home/manohargolleru2000/speech/models/hifigan/'
