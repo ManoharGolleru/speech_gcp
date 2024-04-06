@@ -88,29 +88,14 @@ def setup_models():
 
 model, denoiser, sampling_rate, generator= setup_models()
 
-def synthesize_text(text, speaker1=0.9, speaker2=0.1, rate=0.5, pitch=0.5):
+
+
+
+def synthesize_text(transcript, speaker1=0.9, speaker2=0.1, rate=0.5, pitch=0.5):
     global model, denoiser, sampling_rate
     # Log the values of speaker1, speaker2, rate, and pitch
     print(f"Using speaker1={speaker1}, speaker2={speaker2}, rate={rate}, pitch={pitch}")
-    # Grapheme to phoneme conversion
-    txt = re.sub('[\!]+', ',', text)
-    txt = re.sub('-', ' ', txt)
-    txt = re.sub(';', '-', txt)
-    txt = re.sub('\|', '. ', txt)
-    phon = g2p(txt)
-    for j, n in enumerate(phon):
-        if n == ' ':
-            phon[j] = '} {'
-    transcript = '{ ' + ' '.join(phon) + ' }'
-    transcript = re.sub(r' ?{ ?- ?} ?', ';', transcript)
-    transcript = re.sub(r' ?{ ?, ?} ?', ',', transcript)
-    transcript = re.sub(r' ?{ ?\. ?} ?', '.', transcript)
-    transcript = re.sub(r' ?{ ?\? ?} ?', '?', transcript)
-    transcript = re.sub(r'{ ?', '{', transcript)
-    transcript = re.sub(r' ?}', '}', transcript)
-    if transcript.strip()[-1:] == '}':
-        transcript = transcript.strip() + '.'
-
+    
     # Speech synthesis
     sequence = np.array(text_to_sequence(transcript, ['english_cleaners']))[None, :]
     sequence = torch.autograd.Variable(torch.from_numpy(sequence)).to('cpu').long()
@@ -138,25 +123,53 @@ def synthesize_text(text, speaker1=0.9, speaker2=0.1, rate=0.5, pitch=0.5):
     buffer.seek(0)  # Reset the buffer pointer
     return buffer
 
+@app.route('/generate_transcript', methods=['POST'])
+def generate_transcript():
+    data = request.get_json()
+    text = data.get('text')
+
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+
+    txt = re.sub('[\!]+', ',', text)
+    txt = re.sub('-', ' ', txt)
+    txt = re.sub(';', '-', txt)
+    txt = re.sub('\|', '. ', txt)
+    phon = g2p(txt)
+    for j, n in enumerate(phon):
+        if n == ' ':
+            phon[j] = '} {'
+    transcript = '{ ' + ' '.join(phon) + ' }'
+    transcript = re.sub(r' ?{ ?- ?} ?', ';', transcript)
+    transcript = re.sub(r' ?{ ?, ?} ?', ',', transcript)
+    transcript = re.sub(r' ?{ ?\. ?} ?', '.', transcript)
+    transcript = re.sub(r' ?{ ?\? ?} ?', '?', transcript)
+    transcript = re.sub(r'{ ?', '{', transcript)
+    transcript = re.sub(r' ?}', '}', transcript)
+    if transcript.strip()[-1:] == '}':
+        transcript = transcript.strip() + '.'
+
+    return jsonify({'transcript': transcript})
+
 @app.route('/synthesize', methods=['POST'])
 def synthesize():
     data = request.get_json()
-    text = data.get('text')
+    transcript = data.get('transcript')
     speaker1 = data.get('Speaker1', 0.9)  # Use default value if not provided
     speaker2 = data.get('Speaker2', 0.1)  # Use default value if not provided
     pitch = data.get('pitch', 0.5)  # Use default value if not provided
     rate = data.get('rate', 0.5)  # Use default value if not provided
     volume = data.get('volume', 1)  # Use default value if not provided
 
-    if not text:
-        return jsonify({'error': 'No text provided'}), 400
+    if not transcript:
+        return jsonify({'error': 'transcript not provided'}), 400
 
     # Log the received values
-    print(f'Received request to synthesize: "{text}"')
+    print(f'Received request to synthesize: "{transcript}"')
     print(f'Speaker1: {speaker1}, Speaker2: {speaker2}, pitch: {pitch}, rate: {rate}, volume: {volume}')
 
     # Get audio data from synthesize_text function
-    audio_buffer = synthesize_text(text, speaker1, speaker2, pitch, rate)
+    audio_buffer = synthesize_text(transcript, speaker1, speaker2, pitch, rate)
 
     # Log that audio data is being sent
     print('Sending audio data to client...')
