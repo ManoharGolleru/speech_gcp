@@ -40,7 +40,7 @@ g2p = G2p()
 def load_checkpoint(filepath, device):
     assert os.path.isfile(filepath)
     print("Loading '{}'".format(filepath))
-    checkpoint_dict = torch.load(filepath, map_location='cpu')
+    checkpoint_dict = torch.load(filepath, map_location='cuda')
     print("Complete.")
     return checkpoint_dict
 
@@ -61,7 +61,7 @@ def setup_models():
     iter = "70000"
     checkpoint_path = path + "checkpoint_" + iter
     model = load_model(hparams)
-    model.load_state_dict(torch.load(checkpoint_path, map_location=torch.device('cpu'))['state_dict'])
+    model.load_state_dict(torch.load(checkpoint_path, map_location=torch.device('cuda'))['state_dict'])
     model = model.cpu().eval()
 
  
@@ -75,8 +75,8 @@ def setup_models():
     json_config = json.loads(data)
     h = AttrDict(json_config)
     torch.manual_seed(h.seed)
-    generator = Generator(h).to('cpu')
-    state_dict_g = load_checkpoint(checkpoint_file, 'cpu')
+    generator = Generator(h).to('cuda')
+    state_dict_g = load_checkpoint(checkpoint_file, 'cuda')
     generator.load_state_dict(state_dict_g['generator'])
     generator.eval()
     generator.remove_weight_norm()
@@ -98,9 +98,9 @@ def synthesize_text(transcript, speaker1=0.9, speaker2=0.1, rate=0.5, pitch=0.5)
     
     # Speech synthesis
     sequence = np.array(text_to_sequence(transcript, ['english_cleaners']))[None, :]
-    sequence = torch.autograd.Variable(torch.from_numpy(sequence)).to('cpu').long()
-    speaks = torch.as_tensor([speaker1, speaker2]).unsqueeze(0).to('cpu')
-    pros = torch.as_tensor([rate, pitch]).unsqueeze(0).to('cpu')  # Speech rate and pitch
+    sequence = torch.autograd.Variable(torch.from_numpy(sequence)).to('cuda').long()
+    speaks = torch.as_tensor([speaker1, speaker2]).unsqueeze(0).to('cuda')
+    pros = torch.as_tensor([rate, pitch]).unsqueeze(0).to('cuda')  # Speech rate and pitch
     _, mel_outputs_postnet, _, _ = model.inference(sequence, speaks, pros)
     melfl = mel_outputs_postnet.float()
     y_g_hat = generator(melfl)
